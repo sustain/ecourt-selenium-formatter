@@ -39,6 +39,33 @@ function array(value) {
   return str;
 }
 
+function rollup(target, value) {
+    return "rollup: " + target + ", xl: " + xlateArgument(value);
+}
+
+function keyPress(target, value) {
+    return "keyPress: " + target + ", xl: " + xlateArgument(value);
+}
+
+origCallSeleniumToString = CallSelenium.prototype.toString;
+
+CallSelenium.prototype.toString = function() {
+    try {
+	return origCallSeleniumToString();
+    } catch (e) {
+	var target = this.rawArgs.length > 0 && this.rawArgs[0] ? this.rawArgs[0] : '';
+	var value = this.rawArgs.length > 1 && this.rawArgs[1] ? this.rawArgs[1] : '';
+	if (this.message == 'rollup') {
+	    return rollup(target, value);
+	} else if (this.message == 'keyPress') {
+	    return keyPress(target, value);
+	}
+	//unsupported
+	throw 'ERROR: Unsupported command [' + this.message + ' | ' + target + ' | ' + value + ']';
+    }
+};
+
+
 Equals.prototype.toString = function() {
   if (this.e1.toString().match(/^\d+$/)) {
     // int
@@ -122,12 +149,13 @@ RegexpMatch.prototype.toString = function() {
 };
 
 function waitFor(expression) {
-  return "for (int second = 0;; second++) {\n" +
-      "\tif (second >= 60) fail(\"timeout\");\n" +
-      "\ttry { " + (expression.setup ? expression.setup() + " " : "") +
-      "if (" + expression.toString() + ") break; } catch (Exception e) {}\n" +
-      "\tThread.sleep(1000);\n" +
-      "}\n";
+    return "waitFor: " + JSON.stringify(arguments);
+  // return "for (int second = 0;; second++) {\n" +
+  //     "\tif (second >= 60) fail(\"timeout\");\n" +
+  //     "\ttry { " + (expression.setup ? expression.setup() + " " : "") +
+  //     "if (" + expression.toString() + ") break; } catch (Exception e) {}\n" +
+  //     "\tThread.sleep(1000);\n" +
+  //     "}\n";
 }
 
 function assertOrVerifyFailure(line, isAssert) {
@@ -388,23 +416,12 @@ WDAPI.Driver = function() {
   this.ref = options.receiver;
 };
 
-WDAPI.Driver.searchContext = function(locatorType, locator) {
-  var locatorString = xlateArgument(locator);
-  switch (locatorType) {
-    case 'xpath':
-      return 'By.xpath(' + locatorString + ')';
-    case 'css':
-      return 'By.cssSelector(' + locatorString + ')';
-    case 'id':
-      return 'By.id(' + locatorString + ')';
-    case 'link':
-      return 'By.linkText(' + locatorString + ')';
-    case 'name':
-      return 'By.name(' + locatorString + ')';
-    case 'tag_name':
-      return 'By.tagName(' + locatorString + ')';
-  }
-  throw 'Error: unknown strategy [' + locatorType + '] for locator [' + locator + ']';
+WDAPI.Driver.searchContext = function(locatorType, locator, list) {
+    var locatorString = xlateArgument(locator);
+    if (locatorType == 'tag_name') {
+	locatorType = 'tagName';
+    }
+    return locatorType + (list ? 's' : '') + '(' + locatorString + ')';
 };
 
 WDAPI.Driver.prototype.back = function() {
@@ -416,11 +433,11 @@ WDAPI.Driver.prototype.close = function() {
 };
 
 WDAPI.Driver.prototype.findElement = function(locatorType, locator) {
-  return new WDAPI.Element(this.ref + ".findElement(" + WDAPI.Driver.searchContext(locatorType, locator) + ")");
+  return new WDAPI.Element(WDAPI.Driver.searchContext(locatorType, locator));
 };
 
 WDAPI.Driver.prototype.findElements = function(locatorType, locator) {
-  return new WDAPI.ElementList(this.ref + ".findElements(" + WDAPI.Driver.searchContext(locatorType, locator) + ")");
+    return new WDAPI.ElementList(WDAPI.Driver.searchContext(locatorType, locator, true));
 };
 
 WDAPI.Driver.prototype.getCurrentUrl = function() {
@@ -484,8 +501,14 @@ WDAPI.Element.prototype.isSelected = function() {
 };
 
 WDAPI.Element.prototype.sendKeys = function(text) {
-  return this.ref + ".sendKeys(" + xlateArgument(text) + ")";
+  return "sendKeys(" + this.ref + ", " + xlateArgument(text) + ")";
 };
+
+WDAPI.Element.prototype.rollup = function(target, value) {
+  return "sendKeys(" + this.ref + ", " + xlateArgument(text) + ")";
+};
+
+
 
 WDAPI.Element.prototype.submit = function() {
   return this.ref + ".submit()";
@@ -493,12 +516,12 @@ WDAPI.Element.prototype.submit = function() {
 
 WDAPI.Element.prototype.select = function(selectLocator) {
   if (selectLocator.type == 'index') {
-    return "new Select(" + this.ref + ").selectByIndex(" + selectLocator.string + ")";
+    return "selectByIndex(" + this.ref + ", " + selectLocator.string + ")";
   }
   if (selectLocator.type == 'value') {
-    return "new Select(" + this.ref + ").selectByValue(" + xlateArgument(selectLocator.string) + ")";
+    return "selectByValue(" + this.ref + ", " + xlateArgument(selectLocator.string) + ")";
   }
-  return "new Select(" + this.ref + ").selectByVisibleText(" + xlateArgument(selectLocator.string) + ")";
+  return "selectByLabel(" + this.ref + ", " + xlateArgument(selectLocator.string) + ")";
 };
 
 WDAPI.ElementList = function(ref) {
