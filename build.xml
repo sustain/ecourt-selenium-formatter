@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="ecourt-selenium-formatter" basedir=".">
+    <property name="output.dir" value="${basedir}/target"/>
+
+    <target name="build" depends="clean,package">
+    </target>
+
+    <target name="clean" description="Clean output directories">
+        <delete dir="${output.dir}"/>
+    </target>
+
+    <target name="package" description="Package plugin">
+        <copy file="install.rdf" todir="${output.dir}/"/>
+        <copy file="chrome.manifest" todir="${output.dir}/"/>
+        <copy todir="${output.dir}/chrome" verbose="yes">
+            <fileset dir="chrome"/>
+        </copy>
+        <zip destfile="${ant.project.name}.xpi" basedir="${output.dir}"/>
+    </target>
+
+</project>
