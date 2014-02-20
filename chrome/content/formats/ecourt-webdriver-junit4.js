@@ -39,30 +39,22 @@ function array(value) {
     return str;
 }
 
-function rollup(target, value) {
-    return "rollup: " + target + ", xl: " + xlateArgument(value);
+function autoComplete(locator, searchValue, selectValue) {
+    var driver = new WDAPI.Driver();
+    return driver.findElement(locator.type, locator.string).autoComplete(searchValue, selectValue);
 }
 
-function keyPress(target, value) {
-    return "keyPress: " + target + ", xl: " + xlateArgument(value);
-}
-
-origCallSeleniumToString = CallSelenium.prototype.toString;
-
-CallSelenium.prototype.toString = function () {
-    try {
-        return origCallSeleniumToString();
-    } catch (e) {
-        var target = this.rawArgs.length > 0 && this.rawArgs[0] ? this.rawArgs[0] : '';
-        var value = this.rawArgs.length > 1 && this.rawArgs[1] ? this.rawArgs[1] : '';
-        if (this.message == 'rollup') {
-            return rollup(target, value);
-        } else if (this.message == 'keyPress') {
-            return keyPress(target, value);
+SeleniumWebDriverAdaptor.prototype.rollup = function(elementLocator) {
+    if (this.rawArgs[0] == 'autoComplete') {
+        var args = this.rawArgs[1].split(',');
+        var loc = args[0].trim();
+        if (loc.indexOf('locator=') === 0) {
+            loc = loc.substr(8);
         }
-        //unsupported
-        throw 'ERROR: Unsupported command [' + this.message + ' | ' + target + ' | ' + value + ']';
+        var locator = this._elementLocator(loc);
+        return autoComplete(locator, args[1].trim().split('=')[1], args[2].trim().split('=')[1]);
     }
+    return "rollup: elementLocator: " + elementLocator;
 };
 
 
@@ -504,8 +496,8 @@ WDAPI.Element.prototype.sendKeys = function (text) {
     return "sendKeys(" + this.ref + ", " + xlateArgument(text) + ")";
 };
 
-WDAPI.Element.prototype.rollup = function (target, value) {
-    return "sendKeys(" + this.ref + ", " + xlateArgument(text) + ")";
+WDAPI.Element.prototype.autoComplete = function (searchValue, selectValue) {
+    return "autoComplete(" + this.ref + ", \"" + searchValue + "\", \"" + selectValue + "\")";
 };
 
 
