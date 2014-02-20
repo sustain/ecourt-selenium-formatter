@@ -49,6 +49,8 @@ function combobox(locator, value) {
     return driver.findElement(locator.type, locator.string).combobox(value);
 }
 
+SeleniumWebDriverAdaptor.prototype.keyPress = SeleniumWebDriverAdaptor.prototype.sendKeys;
+
 SeleniumWebDriverAdaptor.prototype.rollup = function(elementLocator) {
     var target = this.rawArgs[0];
     var args = this.rawArgs[1].split(',');
@@ -503,6 +505,10 @@ WDAPI.Element.prototype.isSelected = function () {
 
 WDAPI.Element.prototype.sendKeys = function (text) {
     return "sendKeys(" + this.ref + ", " + xlateArgument(text) + ")";
+};
+
+WDAPI.Element.prototype.type = function (text) {
+    return "type(" + this.ref + ", " + xlateArgument(text) + ")";
 };
 
 WDAPI.Element.prototype.rollup = function (target, rollupArgs) {
