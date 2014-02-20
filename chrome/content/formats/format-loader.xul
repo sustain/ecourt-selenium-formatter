@@ -5,10 +5,10 @@
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
     <script type="application/x-javascript" src="chrome://selenium-ide/content/api.js"/>
-    <script type="application/x-javascript" src="chrome://java-formatters/content/formats/ecourt-webdriver-junit4.js"/>
+    <script type="application/x-javascript" src="chrome://ecourt-formatters/content/formats/ecourt-webdriver-junit4.js"/>
     <html:script type="application/javascript">
         var ide_api = new API();
         ide_api.addPlugin("ecourtseleniumformatter@sustain.net");
-        ide_api.addPluginProvidedFormatter("ecourtseleniumformatter", "eCourt JUnit4", "chrome://java-formatters/content/formats/ecourt-webdriver-junit4.js", "webdriver");
+        ide_api.addPluginProvidedFormatter("ecourtseleniumformatter", "eCourt JUnit4", "chrome://ecourt-formatters/content/formats/ecourt-webdriver-junit4.js", "webdriver");
     </html:script>
 </overlay>
