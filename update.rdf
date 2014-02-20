@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+    <RDF:Description about="urn:mozilla:extension:ecourtseleniumformatter@sustain.net">
+        <em:updates>
+            <RDF:Seq>
+                <!-- one li for each new release; newest first according to some sources -->
+                <RDF:li>
+                    <RDF:Description>
+                        <em:version>1.0.59</em:version>
+                        <em:targetApplication>
+                            <RDF:Description>
+                                <em:id>ecourtseleniumformatter@sustain.net</em:id>
+                                <em:minVersion>3.0</em:minVersion>
+                                <em:maxVersion>30.*</em:maxVersion>
+                                <em:updateLink>https://github.com/sustain/ecourt-selenium-formatter/releases/ecourt-selenium-formatter-1.0.59.xpi</em:updateLink>
+                                <em:updateHash>sha1:7dcd1693d095053a6e33033cc6712ce1b18b0e63</em:updateHash>
+                            </RDF:Description>
+                        </em:targetApplication>
+                    </RDF:Description>
+                </RDF:li>
+            </RDF:Seq>
+        </em:updates>
+    </RDF:Description>
+</RDF:RDF>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="ecourt-selenium-formatter" basedir=".">
     <property name="output.dir" value="${basedir}/target"/>
+    <property name="project.version" value="1.0.59"/>
 
     <target name="build" depends="clean,package">
     </target>
@@ -15,7 +16,7 @@
         <copy todir="${output.dir}/chrome" verbose="yes">
             <fileset dir="chrome"/>
         </copy>
-        <zip destfile="${ant.project.name}.xpi" basedir="${output.dir}"/>
+        <zip destfile="${ant.project.name}-${project.version}.xpi" basedir="${output.dir}"/>
     </target>
 
 </project>
