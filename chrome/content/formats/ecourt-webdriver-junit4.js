@@ -376,6 +376,8 @@ options.header =
         "import com.sustain.it.common.Page;\n" +
         "import org.openqa.selenium.By;\n" +
         "import org.openqa.selenium.WebElement;\n" +
+        "import org.junit.*;\n" +
+        "import static org.junit.Assert.*;\n" +
         "import org.openqa.selenium.support.FindBy;\n" +
         "\n" +
         "public class ${className}Page extends Page {\n" +
