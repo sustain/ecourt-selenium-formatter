@@ -10,6 +10,62 @@ if (!this.formatterType) {  // this.formatterType is defined for the new Formatt
     subScriptLoader.loadSubScript('chrome://selenium-ide/content/formats/webdriver.js', this);
 }
 
+// small modification from webdriver.js
+// override since we want to actually handle waitForPageToLoad
+this.postFilter = function (originalCommands) {
+    var commands = [];
+    var commandsToSkip = {
+        'waitForPageToLoad': 0, // webdriver skips this
+        'pause': 1
+    };
+    var rc;
+    for (var i = 0; i < originalCommands.length; i++) {
+        var c = originalCommands[i];
+        if (c.type == 'command') {
+            if (commandsToSkip[c.command] && commandsToSkip[c.command] == 1) {
+                //Skip
+            } else if (rc = SeleneseMapper.remap(c)) {  //Yes, this IS an assignment
+                //Remap
+                commands.push.apply(commands, rc);
+            } else {
+                commands.push(c);
+            }
+        } else {
+            commands.push(c);
+        }
+    }
+    return commands;
+};
+
+var simpleCommands = {
+    "waitForPageToLoad" : 0,
+    "waitForTextPresent" : 1,
+    "verifyTextPresent" : 1,
+    "assertConfirmation" : 1
+};
+
+origFormatCommand = formatCommand;
+formatCommand = function (command) {
+    var srcCommand = command.remapped || command;
+    var simpleCommandArgCount = simpleCommands[srcCommand.command];
+    if (simpleCommandArgCount != undefined) {
+        if (simpleCommandArgCount === 0) {
+            return srcCommand.command + '();';
+        }
+        return srcCommand.command + '("' + srcCommand.target.replace('"', '\\"').replace('\n', '\\n') + '");';
+    }
+    if (command.command.match(/^waitFor/)) {
+        if (command.value) {
+            command.value = 'locator=' + command.target + ', value=' + command.value;
+        } else {
+            command.value = 'locator=' + command.target;
+        }
+        command.target = command.command;
+        command.command = 'rollup';
+    }
+    return origFormatCommand(command);
+};
+
 function useSeparateEqualsForArray() {
     return true;
 }
@@ -49,7 +105,9 @@ function combobox(locator, value) {
     return driver.findElement(locator.type, locator.string).combobox(value);
 }
 
+// support some deprecated commands
 SeleniumWebDriverAdaptor.prototype.keyPress = SeleniumWebDriverAdaptor.prototype.sendKeys;
+SeleniumWebDriverAdaptor.prototype.keyUp = SeleniumWebDriverAdaptor.prototype.sendKeys;
 
 SeleniumWebDriverAdaptor.prototype.rollup = function(elementLocator) {
     var target = this.rawArgs[0];
@@ -63,11 +121,16 @@ SeleniumWebDriverAdaptor.prototype.rollup = function(elementLocator) {
         rollupArgs.push(args[a].trim().split('=')[1]);
     }
 
-    var driver = new WDAPI.Driver();
     var locator = this._elementLocator(loc);
+    var driver = new WDAPI.Driver();
     return driver.findElement(locator.type, locator.string).rollup(target, rollupArgs);
 };
 
+SeleniumWebDriverAdaptor.prototype.type = function(elementLocator, text) {
+  var locator = this._elementLocator(this.rawArgs[0]);
+  var driver = new WDAPI.Driver();
+  return driver.findElement(locator.type, locator.string).type(this.rawArgs[1]);
+};
 
 Equals.prototype.toString = function () {
     if (this.e1.toString().match(/^\d+$/)) {
@@ -151,16 +214,6 @@ RegexpMatch.prototype.toString = function () {
     }
 };
 
-function waitFor(expression) {
-    return "waitFor: " + JSON.stringify(arguments);
-    // return "for (int second = 0;; second++) {\n" +
-    //     "\tif (second >= 60) fail(\"timeout\");\n" +
-    //     "\ttry { " + (expression.setup ? expression.setup() + " " : "") +
-    //     "if (" + expression.toString() + ") break; } catch (Exception e) {}\n" +
-    //     "\tThread.sleep(1000);\n" +
-    //     "}\n";
-}
-
 function assertOrVerifyFailure(line, isAssert) {
     var message = '"expected failure"';
     var failStatement = "fail(" + message + ");";
@@ -176,6 +229,9 @@ function echo(message) {
 }
 
 function formatComment(comment) {
+//    if (comment.comment.match(/^Warning: .* may require manual changes$/)) {
+//        return '';
+//    }
     return comment.comment.replace(/.+/mg, function (str) {
         return "// " + str;
     });
@@ -306,92 +362,37 @@ function defaultExtension() {
 
 this.options = {
     receiver: "driver",
-    packageName: "com.example.tests",
-    indent: '2',
+    environment: "lasc",
+    packageName: "com.sustain.it",
+    indent: '4',
     initialIndents: '2',
     showSelenese: 'false',
     defaultExtension: "java"
 };
 
 options.header =
-    "package ${packageName};\n" +
+    "package ${packageName}.${environment}.pages;\n" +
         "\n" +
-        "import java.util.regex.Pattern;\n" +
-        "import java.util.concurrent.TimeUnit;\n" +
-        "import org.junit.*;\n" +
-        "import static org.junit.Assert.*;\n" +
-        "import static org.hamcrest.CoreMatchers.*;\n" +
-        "import org.openqa.selenium.*;\n" +
-        "import org.openqa.selenium.firefox.FirefoxDriver;\n" +
-        "import org.openqa.selenium.support.ui.Select;\n" +
+        "import com.sustain.it.common.Page;\n" +
+        "import org.openqa.selenium.By;\n" +
+        "import org.openqa.selenium.WebElement;\n" +
+        "import org.openqa.selenium.support.FindBy;\n" +
         "\n" +
-        "public class ${className} {\n" +
-        indents(1) + "private WebDriver driver;\n" +
-        indents(1) + "private String baseUrl;\n" +
-        indents(1) + "private boolean acceptNextAlert = true;\n" +
-        indents(1) + "private StringBuffer verificationErrors = new StringBuffer();\n" +
-        indents(0) + "\n" +
-        indents(1) + "@Before\n" +
-        indents(1) + "public void setUp() throws Exception {\n" +
-        indents(2) + "driver = new FirefoxDriver();\n" +
-        indents(2) + "baseUrl = \"${baseURL}\";\n" +
-        indents(2) + "driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);\n" +
-        indents(1) + "}\n" +
-        indents(0) + "\n" +
-        indents(1) + "@Test\n" +
-        indents(1) + "public void ${methodName}() throws Exception {\n";
+        "public class ${className}Page extends Page {\n" +
+        indents(1) + "public UnknownResultPage ${methodName}() {\n";
 
 options.footer =
+    indents(2) + "return landOnPage(UnknownResultPage.class);\n" +
     indents(1) + "}\n" +
-        indents(0) + "\n" +
-        indents(1) + "@After\n" +
-        indents(1) + "public void tearDown() throws Exception {\n" +
-        indents(2) + "driver.quit();\n" +
-        indents(2) + "String verificationErrorString = verificationErrors.toString();\n" +
-        indents(2) + "if (!\"\".equals(verificationErrorString)) {\n" +
-        indents(3) + "fail(verificationErrorString);\n" +
-        indents(2) + "}\n" +
-        indents(1) + "}\n" +
-        indents(0) + "\n" +
-        indents(1) + "private boolean isElementPresent(By by) {\n" +
-        indents(2) + "try {\n" +
-        indents(3) + "driver.findElement(by);\n" +
-        indents(3) + "return true;\n" +
-        indents(2) + "} catch (NoSuchElementException e) {\n" +
-        indents(3) + "return false;\n" +
-        indents(2) + "}\n" +
-        indents(1) + "}\n" +
-        indents(0) + "\n" +
-        indents(1) + "private boolean isAlertPresent() {\n" +
-        indents(2) + "try {\n" +
-        indents(3) + "driver.switchTo().alert();\n" +
-        indents(3) + "return true;\n" +
-        indents(2) + "} catch (NoAlertPresentException e) {\n" +
-        indents(3) + "return false;\n" +
-        indents(2) + "}\n" +
-        indents(1) + "}\n" +
-        indents(0) + "\n" +
-        indents(1) + "private String closeAlertAndGetItsText() {\n" +
-        indents(2) + "try {\n" +
-        indents(3) + "Alert alert = driver.switchTo().alert();\n" +
-        indents(3) + "String alertText = alert.getText();\n" +
-        indents(3) + "if (acceptNextAlert) {\n" +
-        indents(4) + "alert.accept();\n" +
-        indents(3) + "} else {\n" +
-        indents(4) + "alert.dismiss();\n" +
-        indents(3) + "}\n" +
-        indents(3) + "return alertText;\n" +
-        indents(2) + "} finally {\n" +
-        indents(3) + "acceptNextAlert = true;\n" +
-        indents(2) + "}\n" +
-        indents(1) + "}\n" +
-        indents(0) + "}\n";
+    "}\n";
 
 this.configForm =
     '<description>Variable for Selenium instance</description>' +
         '<textbox id="options_receiver" />' +
         '<description>Package</description>' +
         '<textbox id="options_packageName" />' +
+        '<description>Environment</description>' +
+        '<textbox id="options_environment" />' +
         '<description>Header</description>' +
         '<textbox id="options_header" multiline="true" flex="1" rows="4"/>' +
         '<description>Footer</description>' +
@@ -410,7 +411,7 @@ this.configForm =
         '</menupopup></menulist>' +
         '<checkbox id="options_showSelenese" label="Show Selenese"/>';
 
-this.name = "JUnit 4 (WebDriver)";
+this.name = "eCourt JUnit 4 (WebDriver)";
 this.testcaseExtension = ".java";
 this.suiteExtension = ".java";
 this.webdriver = true;
@@ -423,6 +424,9 @@ WDAPI.Driver.searchContext = function (locatorType, locator, list) {
     var locatorString = xlateArgument(locator);
     if (locatorType == 'tag_name') {
         locatorType = 'tagName';
+    }
+    if (locatorType == 'css') {
+        locatorType = 'cssSelector';
     }
     return locatorType + (list ? 's' : '') + '(' + locatorString + ')';
 };
@@ -451,7 +455,7 @@ WDAPI.Driver.prototype.get = function (url) {
     if (url.length > 1 && (url.substring(1, 8) == "http://" || url.substring(1, 9) == "https://")) { // url is quoted
         return this.ref + ".get(" + url + ")";
     } else {
-        return this.ref + ".get(baseUrl + " + url + ")";
+        return "gotoPage(" + url + ", UnknownPage.class)";
     }
 };
 
@@ -512,10 +516,14 @@ WDAPI.Element.prototype.type = function (text) {
 };
 
 WDAPI.Element.prototype.rollup = function (target, rollupArgs) {
+    var loc = this.ref;
+    if (target.match(/^waitFor/)) {
+        loc = 'By.' + loc;
+    }
     if (rollupArgs.length > 0) {
-        return target + "(" + this.ref + ", \"" + rollupArgs.join("\", \"") + "\")";
+        return target + "(" + loc + ", \"" + rollupArgs.join("\", \"") + "\")";
     } else {
-        return target + "(" + this.ref + ")";
+        return target + "(" + loc + ")";
     }
 };
 
