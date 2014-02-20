@@ -51,23 +51,19 @@ function combobox(locator, value) {
 
 SeleniumWebDriverAdaptor.prototype.rollup = function(elementLocator) {
     var target = this.rawArgs[0];
-    if (target == 'autoComplete' || target == 'combobox') {
-        var args = this.rawArgs[1].split(',');
-        var loc = args[0].trim();
-        if (loc.indexOf('locator=') === 0) {
-            loc = loc.substr(8);
-        }
-        var locator = this._elementLocator(loc);
-        var arg1 = args.length > 1 ? args[1].trim().split('=')[1] : undefined;
-        var arg2 = args.length > 2 ? args[2].trim().split('=')[1] : undefined;
-
-        if (target == 'autoComplete') {
-            return autoComplete(locator, arg1, arg2);
-        } else if (target == 'combobox') {
-            return combobox(locator, arg1);
-        }
+    var args = this.rawArgs[1].split(',');
+    var loc = args[0].trim();
+    if (loc.indexOf('locator=') === 0) {
+        loc = loc.substr(8);
     }
-    return "rollup: elementLocator: " + elementLocator;
+    var rollupArgs = [];
+    for (var a = 1; a < args.length; ++a) {
+        rollupArgs.push(args[a].trim().split('=')[1]);
+    }
+
+    var driver = new WDAPI.Driver();
+    var locator = this._elementLocator(loc);
+    return driver.findElement(locator.type, locator.string).rollup(target, rollupArgs);
 };
 
 
@@ -509,14 +505,13 @@ WDAPI.Element.prototype.sendKeys = function (text) {
     return "sendKeys(" + this.ref + ", " + xlateArgument(text) + ")";
 };
 
-WDAPI.Element.prototype.autoComplete = function (searchValue, selectValue) {
-    return "autoComplete(" + this.ref + ", \"" + searchValue + "\", \"" + selectValue + "\")";
+WDAPI.Element.prototype.rollup = function (target, rollupArgs) {
+    if (rollupArgs.length > 0) {
+        return target + "(" + this.ref + ", \"" + rollupArgs.join("\", \"") + "\")";
+    } else {
+        return target + "(" + this.ref + ")";
+    }
 };
-
-WDAPI.Element.prototype.combobox = function (value) {
-    return "combobox(" + this.ref + ", \"" + value + "\")";
-};
-
 
 WDAPI.Element.prototype.submit = function () {
     return this.ref + ".submit()";
