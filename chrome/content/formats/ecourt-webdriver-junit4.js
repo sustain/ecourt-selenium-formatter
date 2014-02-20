@@ -44,15 +44,28 @@ function autoComplete(locator, searchValue, selectValue) {
     return driver.findElement(locator.type, locator.string).autoComplete(searchValue, selectValue);
 }
 
+function combobox(locator, value) {
+    var driver = new WDAPI.Driver();
+    return driver.findElement(locator.type, locator.string).combobox(value);
+}
+
 SeleniumWebDriverAdaptor.prototype.rollup = function(elementLocator) {
-    if (this.rawArgs[0] == 'autoComplete') {
+    var target = this.rawArgs[0];
+    if (target == 'autoComplete' || target == 'combobox') {
         var args = this.rawArgs[1].split(',');
         var loc = args[0].trim();
         if (loc.indexOf('locator=') === 0) {
             loc = loc.substr(8);
         }
         var locator = this._elementLocator(loc);
-        return autoComplete(locator, args[1].trim().split('=')[1], args[2].trim().split('=')[1]);
+        var arg1 = args.length > 1 ? args[1].trim().split('=')[1] : undefined;
+        var arg2 = args.length > 2 ? args[2].trim().split('=')[1] : undefined;
+
+        if (target == 'autoComplete') {
+            return autoComplete(locator, arg1, arg2);
+        } else if (target == 'combobox') {
+            return combobox(locator, arg1);
+        }
     }
     return "rollup: elementLocator: " + elementLocator;
 };
@@ -498,6 +511,10 @@ WDAPI.Element.prototype.sendKeys = function (text) {
 
 WDAPI.Element.prototype.autoComplete = function (searchValue, selectValue) {
     return "autoComplete(" + this.ref + ", \"" + searchValue + "\", \"" + selectValue + "\")";
+};
+
+WDAPI.Element.prototype.combobox = function (value) {
+    return "combobox(" + this.ref + ", \"" + value + "\")";
 };
 
 
