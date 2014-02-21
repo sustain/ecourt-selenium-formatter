@@ -13,7 +13,7 @@
                                 <em:id>ecourtseleniumformatter@sustain.net</em:id>
                                 <em:minVersion>3.0</em:minVersion>
                                 <em:maxVersion>30.*</em:maxVersion>
-                                <em:updateLink>https://github.com/sustain/ecourt-selenium-formatter/releases/ecourt-selenium-formatter-1.0.59.xpi</em:updateLink>
+                                <em:updateLink>https://github.com/sustain/ecourt-selenium-formatter/releases/download/v1.0.59/ecourt-selenium-formatter-1.0.59.xpi</em:updateLink>
                                 <em:updateHash>sha1:7dcd1693d095053a6e33033cc6712ce1b18b0e63</em:updateHash>
                             </RDF:Description>
                         </em:targetApplication>
