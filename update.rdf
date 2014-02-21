@@ -6,6 +6,7 @@
             <RDF:Seq>
                 <!-- one li for each new release; newest first according to some sources -->
                 <RDF:li>
+                    <!-- next version goes here -->
                     <RDF:Description>
                         <em:version>1.0.59</em:version>
                         <em:targetApplication>
