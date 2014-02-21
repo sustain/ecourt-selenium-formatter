@@ -4,12 +4,12 @@
     <Description about="urn:mozilla:install-manifest">
         <em:id>ecourtseleniumformatter@sustain.net</em:id>
         <em:name>Selenium IDE: eCourt Formatter</em:name>
-        <em:version>1.0.59</em:version>
+        <em:version>1.0.58</em:version>
         <em:developer>Vardan Akopian</em:developer>
         <em:creator>Vardan Akopian</em:creator>
         <em:description>eCourt Java code formatter for Selenium IDE</em:description>
         <em:type>2</em:type>
-        <em:updateURL>https://raw2.github.com/sustain/ecourt-selenium-formatter/master/update.rdf</em:updateURL>
+        <em:updateURL>https://raw.github.com/sustain/ecourt-selenium-formatter/master/update.rdf</em:updateURL>
 
         <em:targetApplication>
           <Description>
