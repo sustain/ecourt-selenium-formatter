@@ -10,7 +10,7 @@
                         <em:version>1.0.59</em:version>
                         <em:targetApplication>
                             <RDF:Description>
-                                <em:id>ec8030f7-c20a-464f-9b0e-13a3a9e97384</em:id>
+                                <em:id>ec8030f7-c20a-464f-9b0e-13a3a9e97384</em:id> <!-- firefox -->
                                 <em:minVersion>3.0</em:minVersion>
                                 <em:maxVersion>30.*</em:maxVersion>
                                 <em:updateLink>https://github.com/sustain/ecourt-selenium-formatter/releases/download/v1.0.59/ecourt-selenium-formatter-1.0.59.xpi</em:updateLink>
