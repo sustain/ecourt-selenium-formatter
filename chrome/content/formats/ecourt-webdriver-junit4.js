@@ -371,20 +371,19 @@ this.options = {
 };
 
 options.header =
-    "package ${packageName}.${environment}.pages;\n" +
+    "package ${packageName}.${environment};\n" +
         "\n" +
-        "import com.sustain.it.common.Page;\n" +
+        "import com.sustain.it.common.IntegrationTest;\n" +
         "import org.openqa.selenium.By;\n" +
         "import org.openqa.selenium.WebElement;\n" +
         "import org.junit.*;\n" +
         "import static org.junit.Assert.*;\n" +
-        "import org.openqa.selenium.support.FindBy;\n" +
         "\n" +
-        "public class ${className}Page extends Page {\n" +
-        indents(1) + "public UnknownResultPage ${methodName}() {\n";
+        "public class ${className}IT extends IntegrationTest {\n" +
+        indents(1) + "@Test\n" +
+        indents(1) + "public void ${methodName}() {\n";
 
 options.footer =
-    indents(2) + "return landOnPage(UnknownResultPage.class);\n" +
     indents(1) + "}\n" +
     "}\n";
 
@@ -457,7 +456,7 @@ WDAPI.Driver.prototype.get = function (url) {
     if (url.length > 1 && (url.substring(1, 8) == "http://" || url.substring(1, 9) == "https://")) { // url is quoted
         return this.ref + ".get(" + url + ")";
     } else {
-        return "gotoPage(" + url + ", UnknownPage.class)";
+        return "gotoPage(" + url + ")";
     }
 };
 
