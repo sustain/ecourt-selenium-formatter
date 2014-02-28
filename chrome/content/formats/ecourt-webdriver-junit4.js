@@ -568,3 +568,38 @@ WDAPI.Utils.isElementPresent = function (how, what) {
 WDAPI.Utils.isAlertPresent = function () {
     return "isAlertPresent()";
 };
+
+// copied from tools.js to set the filename
+showFilePicker = function (window, title, mode, defaultDirPrefName, handler, defaultExtension) {
+    // parse the filename from the title that was created with the formatted string saveTestCaseAs
+    var pattern = Editor.getFormattedString("saveTestCaseAs", ['(.*)']);
+    var groups = title.match(new RegExp(pattern));
+    var filename = null;
+    if (groups.length > 1) {
+        filename = testClassName(groups[1]) + 'IT.java';
+    }
+
+    var nsIFilePicker = Components.interfaces.nsIFilePicker;
+    var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+    fp.init(window, title, mode);
+    if (defaultExtension) {
+        fp.defaultExtension = defaultExtension;
+    }
+    if (filename) {
+        fp.defaultString = filename;
+    }
+    var defaultDir = Preferences.getString(defaultDirPrefName);
+    if (defaultDir) {
+        fp.displayDirectory = FileUtils.getFile(defaultDir);
+    }
+    fp.appendFilters(nsIFilePicker.filterHTML | nsIFilePicker.filterAll);
+    var res = fp.show();
+    if (res == nsIFilePicker.returnOK || res == nsIFilePicker.returnReplace) {
+        Preferences.setString(defaultDirPrefName, fp.file.parent.path);
+        return handler(fp);
+    } else {
+        return null;
+    }
+};
+
+
