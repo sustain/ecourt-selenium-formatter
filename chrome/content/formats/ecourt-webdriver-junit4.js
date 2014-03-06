@@ -388,7 +388,7 @@ options.header =
         "import org.junit.*;\n" +
         "import static org.junit.Assert.*;\n" +
         "\n" +
-        "public class ${className}IT extends IntegrationTest {\n" +
+        "public class ${className} extends IntegrationTest {\n" +
         indents(1) + "@Test\n" +
         indents(1) + "public void ${methodName}() {\n";
 
