@@ -525,13 +525,38 @@ WDAPI.Element.prototype.type = function (text) {
     return "type(" + this.ref + ", " + xlateArgument(text) + ")";
 };
 
+var rollupsArgTypes = {
+    'combobox': ['string'],
+    'autoComplete': ['string', 'string', 'int'],
+    'typeDate': ['int', 'bool'],
+    'typeMonthYear': ['int'],
+    'typeNumber': ['int'],
+    'citationOrCaseNumber': ['string']
+};
+
 WDAPI.Element.prototype.rollup = function (target, rollupArgs) {
     var loc = this.ref;
     if (target.match(/^waitFor/)) {
         loc = 'By.' + loc;
     }
     if (rollupArgs.length > 0) {
-        return target + "(" + loc + ", \"" + rollupArgs.join("\", \"") + "\")";
+        var rollupArgTypes = rollupsArgTypes[target];
+        if (rollupArgTypes == undefined) {
+            return target + "(" + loc + ", \"" + rollupArgs.join("\", \"") + "\")";
+        } else {
+            var strArgs = '';
+            for (var i = 0; i < rollupArgs.length; ++i) {
+                if (strArgs) strArgs += ', ';
+                var rollupArg = rollupArgs[i];
+                var rollupArgType = i < rollupArgTypes.length ? rollupArgTypes[i] : 'string';
+                if (rollupArgType == 'string') {
+                    strArgs += '"' + rollupArg + '"';
+                } else {
+                    strArgs += rollupArg;
+                }
+            }
+            return target + "(" + loc + ", " + strArgs + ")";
+        }
     } else {
         return target + "(" + loc + ")";
     }
