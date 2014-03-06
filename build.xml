@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="ecourt-selenium-formatter" basedir=".">
     <property name="output.dir" value="${basedir}/target"/>
-    <property name="project.version" value="1.0.68"/>
+    <property name="project.version" value="1.1.0"/>
 
     <target name="release" depends="clean,package,refresh_update_rdf" description="Clean and Package extension">
         <copyfile src="${ant.project.name}.xpi" dest="${ant.project.name}-${project.version}.xpi"/>

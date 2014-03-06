@@ -8,6 +8,19 @@
                 <RDF:li>
                     <!-- next version goes here -->
                     <RDF:Description>
+                        <em:version>1.1.0</em:version>
+                        <em:targetApplication>
+                            <RDF:Description>
+                                <em:id>ec8030f7-c20a-464f-9b0e-13a3a9e97384</em:id> <!-- firefox -->
+                                <em:minVersion>3.0</em:minVersion>
+                                <em:maxVersion>30.*</em:maxVersion>
+                                <em:updateLink>https://github.com/sustain/ecourt-selenium-formatter/releases/download/v1.1.0/ecourt-selenium-formatter-1.1.0.xpi</em:updateLink>
+                                <em:updateHash>sha1:4f7ee64f342644202e8e899c53430307ab5e5abe</em:updateHash>
+                            </RDF:Description>
+                        </em:targetApplication>
+                    </RDF:Description>
+            
+                    <RDF:Description>
                         <em:version>1.0.68</em:version>
                         <em:targetApplication>
                             <RDF:Description>
