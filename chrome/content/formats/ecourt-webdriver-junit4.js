@@ -44,7 +44,7 @@ var simpleCommands = {
     "assertConfirmation" : 1
 };
 
-origFormatCommand = formatCommand;
+this.origFormatCommand = formatCommand;
 formatCommand = function (command) {
     var srcCommand = command.remapped || command;
     var simpleCommandArgCount = simpleCommands[srcCommand.command];
@@ -63,7 +63,7 @@ formatCommand = function (command) {
         command.target = command.command;
         command.command = 'rollup';
     }
-    return origFormatCommand(command);
+    return this.origFormatCommand(command);
 };
 
 function useSeparateEqualsForArray() {
