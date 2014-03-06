@@ -115,6 +115,15 @@ SeleniumWebDriverAdaptor.prototype.rollup = function(elementLocator) {
     var loc = args[0].trim();
     if (loc.indexOf('locator=') === 0) {
         loc = loc.substr(8);
+        if (loc.indexOf('class=') === 0) {
+            loc = 'css=' + loc.substr(6);
+        } else if (loc.indexOf('//') === 0) {
+            loc = 'xpath=' + loc;
+        } else if (loc.indexOf('document.') === 0) {
+            loc = 'dom=' + loc;
+        } else if (loc.indexOf('id=') !== 0 && loc.indexOf('css=') !== 0 && loc.indexOf('xpath=') !== 0 && loc.indexOf('name=') !== 0 && loc.indexOf('link=') !== 0 && loc.indexOf('dom=') !== 0) {
+            loc = 'id=' + loc;
+        }
     }
     var rollupArgs = [];
     for (var a = 1; a < args.length; ++a) {
